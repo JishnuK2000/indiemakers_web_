@@ -34,17 +34,15 @@ export default function Home() {
       </div>
 
       {/* CONTENT */}
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 min-h-screen flex items-center justify-center">
         <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-6">
-          <div className="w-full lg:w-1/2 space-y-6 animate-slideUp pt-[10rem] sm:pt-[10rem] lg:pt-[20rem]">
-            {/* ↑ added top padding for mobile */}
-
+          <div className="w-full lg:w-1/2 space-y-6 animate-slideUp text-left">
             <h1 className="leading-tight">
               <span className="block font-extrabold text-[clamp(32px,3vw,48px)]">
                 From Zero to Scalable
               </span>
 
-              <span className="block font-extrabold text-[clamp(36px,4vw,52px)]  lg:whitespace-nowrap">
+              <span className="block font-extrabold text-[clamp(36px,4vw,52px)] lg:whitespace-nowrap">
                 We Build Companies, Not Just Products.
               </span>
             </h1>
@@ -56,51 +54,51 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <button
-                onClick={() => setShowModal(true)} // <-- open modal
+                onClick={() => navigate("/our-ventures")}
                 className="px-8 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium hover:bg-[#062F2C] hover:text-white transition-all duration-300"
               >
                 Explore Our Ventures
               </button>
 
               <button
-                onClick={() => setShowModal(true)} // <-- open modal
+                onClick={() => setShowModal(true)}
                 className="px-8 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium hover:bg-[#062F2C] hover:text-white transition-all duration-300"
               >
                 Partner With Us
               </button>
             </div>
           </div>
-          
         </div>
       </div>
-{/* MODAL */}
-{showModal && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center">
-    {/* Backdrop */}
-    <div
-      className="absolute inset-0 bg-black/50"
-      onClick={() => setShowModal(false)} // close on backdrop click
-    />
 
-    {/* Modal content */}
-    <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-8 text-center">
-      <h2 className="text-2xl font-bold text-[#062F2C] mb-4">
-        Coming Soooon 🚀  
-      </h2>
+      {/* MODAL */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowModal(false)} // close on backdrop click
+          />
 
-      <p className="text-gray-600 mb-6">
-        This feature is under development. Stay tuned!
-      </p>
+          {/* Modal content */}
+          <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full mx-4 p-8 text-center">
+            <h2 className="text-2xl font-bold text-[#062F2C] mb-4">
+              Coming Soooon 🚀
+            </h2>
 
-      <button
-        onClick={() => setShowModal(false)}
-        className="px-6 py-3 bg-[#062F2C] text-white rounded-full"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
+            <p className="text-gray-600 mb-6">
+              This feature is under development. Stay tuned!
+            </p>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="px-6 py-3 bg-[#062F2C] text-white rounded-full"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* SOCIAL LINKS — DESKTOP */}
       <div className="hidden lg:flex absolute bottom-8 right-40 z-20 gap-12 text-sm font-medium">
