@@ -1,6 +1,10 @@
 import { Palette, Code, Smartphone, Globe, Database, Zap } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
+
 
 export default function Services() {
+
+  const navigate = useNavigate();
   const services = [
     {
       icon: Palette,
@@ -34,9 +38,24 @@ export default function Services() {
     },
   ];
 
+  const handleApply = () => {
+    navigate('/services-apply');
+  };
+
   return (
-    <div className="h-screen w-screen overflow-hidden pt-16 bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="h-full flex flex-col justify-center px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto py-8">
+    <div
+      className="h-screen w-screen pt-16 bg-gradient-to-br from-gray-50 to-gray-100"
+      style={{
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        className="h-full flex flex-col justify-center px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto py-8"
+        style={{
+          overflowY: window.innerHeight < 800 ? 'auto' : 'hidden',
+           paddingTop: window.innerWidth < 620 ? '29rem' : undefined,
+        }}
+      >
         <div className="text-center mb-8 lg:mb-12 animate-slideUp">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-4">
             What We Do
@@ -46,7 +65,7 @@ export default function Services() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {services.map((service, index) => {
             const Icon = service.icon;
             return (
@@ -75,6 +94,16 @@ export default function Services() {
               </div>
             );
           })}
+        </div>
+
+        {/* Apply Button */}
+        <div className="text-center">
+          <button
+            onClick={handleApply}
+            className="px-8 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition-colors duration-300"
+          >
+            Apply
+          </button>
         </div>
       </div>
     </div>
