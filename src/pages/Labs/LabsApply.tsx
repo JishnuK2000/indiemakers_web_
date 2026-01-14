@@ -99,37 +99,38 @@ export default function LabsApply() {
           validationSchema={stepSchemas[step]}
           validateOnMount
           onSubmit={async (values, { setSubmitting, resetForm }) => {
-  try {
-    const res = await fetch(
-      "https://script.google.com/macros/s/AKfycbzOjlRO1nnsJd7PawJMw7353uDjlcrJfn_KeDfTGRzUqVfGwbaHJt3klVCMjv2MTePa/exec",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          key: "INDIEMAKERS_SECRET_2025",
-          ...values,
-        }),
-      }
-    );
+            try {
+              const payload = {
+                ...values,
+                validation: values.validation.join(", "),
+                createdAt: new Date().toISOString(),
+              };
 
-    const result = await res.json();
+              const res = await fetch(
+                "https://sheetdb.io/api/v1/prbayidgix6el",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    data: [payload],
+                  }),
+                }
+              );
 
-    if (result.success) {
-      alert("Application submitted successfully 🚀");
-      resetForm();
-      setStep(0);
-    } else {
-      alert("Submission failed ❌");
-    }
-  } catch (err) {
-    alert("Network error. Please try later.");
-  } finally {
-    setSubmitting(false);
-  }
-}}
+              if (!res.ok) throw new Error("Request failed");
 
+              alert("Application submitted successfully 🚀");
+              resetForm();
+              setStep(0);
+            } catch (err) {
+              console.error(err);
+              alert("Submission failed ❌");
+            } finally {
+              setSubmitting(false);
+            }
+          }}
         >
           {({ isValid, values, setFieldValue }) => (
             <Form>
