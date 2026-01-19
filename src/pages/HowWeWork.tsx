@@ -1,4 +1,5 @@
 import { Lightbulb, Rocket, Target } from 'lucide-react';
+import PageContainer from '../components/Container';
 
 export default function HowWeWork() {
   const steps = [
@@ -20,6 +21,7 @@ export default function HowWeWork() {
   ];
 
   return (
+    <PageContainer>
     <div className="h-screen w-screen overflow-hidden pt-16 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="h-full flex flex-col justify-center px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto py-8">
         <div className="text-center mb-8 lg:mb-12 animate-slideUp">
@@ -60,6 +62,6 @@ export default function HowWeWork() {
           })}
         </div>
       </div>
-    </div>
+    </div></PageContainer>
   );
 }

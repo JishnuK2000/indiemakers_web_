@@ -12,10 +12,16 @@
     box-sizing: border-box;
   }
 
-  body {
-    overflow: hidden;
-  }
+   body {
+    overflow-y: auto;
+    overflow-x: hidden;
 
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* IE / Edge */
+    -ms-overflow-style: none;
+  }
 
   html, body, #root {
     height: 100%;
