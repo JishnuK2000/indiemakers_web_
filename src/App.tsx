@@ -14,8 +14,9 @@ import ExploreOurVentures from "./pages/OurVentures/OurVentures";
 function App() {
   return (
     <Router>
-      <div className="h-screen w-screen overflow-hidden">
+      <div className=" w-screen ">
         <Navigation />
+        
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/how-we-work" element={<HowWeWork />} />

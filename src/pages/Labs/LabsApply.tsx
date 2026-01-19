@@ -57,6 +57,7 @@ export default function LabsApply() {
   const isLast = step === STEPS.length - 1;
 
   return (
+    
     <div
       className="
         bg-white

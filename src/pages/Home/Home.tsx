@@ -35,7 +35,19 @@ export default function Home() {
 
       {/* CONTENT */}
       <div className="relative z-10 min-h-screen flex items-center justify-center">
-        <div className="w-full max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-6">
+        <div
+          className="
+    w-full
+    max-w-[90rem]
+    mx-auto
+    pl-[1.5rem]
+    pr-[1.5rem]
+    sm:pl-6
+    sm:pr-6
+    lg:pl-[4.5rem]
+    lg:pr-[1.5rem]
+  "
+        >
           <div className="w-full lg:w-1/2 space-y-6 animate-slideUp text-left">
             <h1 className="leading-tight">
               <span className="block font-extrabold text-[clamp(32px,3vw,48px)]">
