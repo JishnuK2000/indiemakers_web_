@@ -35,15 +35,14 @@ export default function LabsDetail() {
         {/* BODY */}
         <div className="space-y-4 text-sm sm:text-base leading-relaxed animate-fadeUp">
           <p>
-            Labs is not an accelerator, agency, or short-term engagement.
-            We partner early, share ownership, and work hands-on to build
-            enduring companies.
+            Labs is not an accelerator, agency, or short-term engagement. We
+            partner early, share ownership, and work hands-on to build enduring
+            companies.
           </p>
 
           <p>
-            We work with a small number of founders each year who bring
-            strong insight, conviction, and the willingness to build for
-            the long term.
+            We work with a small number of founders each year who bring strong
+            insight, conviction, and the willingness to build for the long term.
           </p>
 
           <p className="font-medium">
@@ -57,19 +56,15 @@ export default function LabsDetail() {
         </div>
       </div>
 
+    
+
       {/* FIXED CTA */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-20">
         <button
           onClick={() => navigate("/labs-apply")}
-          className="
-            px-10 py-4
-            rounded-full
-            bg-[#062F2C] text-white
-            text-sm font-medium
-            shadow-lg
-            transition-all duration-300
-            hover:scale-105
-          "
+          className="px-8 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium 
+             flex items-center gap-2
+             hover:bg-[#062F2C] hover:text-white transition-all duration-300"
         >
           Apply Now
         </button>

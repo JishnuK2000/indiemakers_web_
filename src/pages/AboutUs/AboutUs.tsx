@@ -3,6 +3,7 @@
 import { ArrowRight, Layers, Rocket, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import PageContainer from "../../components/Container";
+import { useNavigate } from "react-router-dom";
 
 /* ------------------ Animation Variants ------------------ */
 
@@ -36,6 +37,7 @@ const cardMotion = {
 /* ------------------ Component ------------------ */
 
 export default function AboutUs() {
+  const navigate = useNavigate();
   return (
     <PageContainer>
       <section className="w-full bg-white overflow-y-auto pb-32 px-4 sm:px-6 lg:px-12">
@@ -122,8 +124,15 @@ export default function AboutUs() {
                   mindset. This is where we compound.
                 </p>
               </div>
-
-              <PrimaryButton text="Explore Our Ventures" />
+              <button
+                onClick={() => navigate("/our-ventures")}
+                className="px-8 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium 
+             flex items-center gap-2
+             hover:bg-[#062F2C] hover:text-white transition-all duration-300"
+              >
+                Explore Our Ventures
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </motion.div>
 
             {/* Labs */}
@@ -163,8 +172,15 @@ export default function AboutUs() {
                   build partner, we should talk.
                 </p>
               </div>
-
-              <PrimaryButton text="Apply to Co-Build" />
+              <button
+                onClick={() => navigate("/Labs")}
+                className="px-8 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium 
+             flex items-center gap-2
+             hover:bg-[#062F2C] hover:text-white transition-all duration-300"
+              >
+                Apply to Co-Build
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </motion.div>
 
             {/* Services */}
@@ -201,8 +217,15 @@ export default function AboutUs() {
                   partnerships.
                 </p>
               </div>
-
-              <PrimaryButton text="Start a Conversation" />
+              <button
+                // onClick={() => navigate("/our-ventures")}
+                className="px-8 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium 
+             flex items-center gap-2
+             hover:bg-[#062F2C] hover:text-white transition-all duration-300"
+              >
+                Start a Conversation
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </motion.div>
           </div>
         </div>

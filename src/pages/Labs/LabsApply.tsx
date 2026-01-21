@@ -1,4 +1,4 @@
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import { useState } from "react";
 import * as Yup from "yup";
 
@@ -12,6 +12,26 @@ const STEPS = [
   "Commitment & Timeline",
   "Review & Submit",
 ];
+// Define TypeScript type for form values
+interface LabsFormValues {
+  fullName: string;
+  email: string;
+  role: string;
+  website: string;
+  problem: string;
+  targetCustomer: string;
+  solution: string;
+  whyNow: string;
+  validation: string[];
+  businessModel: string;
+  opportunitySize: string;
+  whyYou: string;
+  expectations: string;
+  equityPartnership: string;
+  involvement: string;
+  timeline: string;
+  success3Years: string;
+}
 
 /* -------------------- VALIDATION PER STEP -------------------- */
 
@@ -50,6 +70,41 @@ const stepSchemas = [
   Yup.object(),
 ];
 
+// Helper function to build email body
+const buildEmailBody = (values: LabsFormValues): string => {
+  return `
+Indiemakers Labs – New Application
+
+ABOUT YOU
+Full Name: ${values.fullName}
+Email: ${values.email}
+Role: ${values.role}
+Website: ${values.website}
+
+THE IDEA
+Problem: ${values.problem}
+Target Customer: ${values.targetCustomer}
+Solution: ${values.solution}
+Why Now: ${values.whyNow}
+
+VALIDATION & MARKET
+Validation: ${values.validation.join(", ")}
+Business Model: ${values.businessModel}
+Opportunity Size: ${values.opportunitySize}
+
+YOU AS A PARTNER
+Why You: ${values.whyYou}
+Expectations: ${values.expectations}
+Equity Partnership: ${values.equityPartnership}
+Involvement: ${values.involvement}
+
+COMMITMENT & TIMELINE
+Timeline: ${values.timeline}
+Success in 3 Years: ${values.success3Years}
+
+Submitted On: ${new Date().toLocaleString()}
+`.trim();
+};
 /* -------------------- PAGE -------------------- */
 
 export default function LabsApply() {
@@ -57,7 +112,6 @@ export default function LabsApply() {
   const isLast = step === STEPS.length - 1;
 
   return (
-    
     <div
       className="
         bg-white
@@ -77,7 +131,7 @@ export default function LabsApply() {
           Step {step + 1} of {STEPS.length} — {STEPS[step]}
         </p>
 
-        <Formik
+        <Formik<LabsFormValues>
           initialValues={{
             fullName: "",
             email: "",
@@ -87,7 +141,7 @@ export default function LabsApply() {
             targetCustomer: "",
             solution: "",
             whyNow: "",
-            validation: [] as string[],
+            validation: [],
             businessModel: "",
             opportunitySize: "",
             whyYou: "",
@@ -99,8 +153,12 @@ export default function LabsApply() {
           }}
           validationSchema={stepSchemas[step]}
           validateOnMount
-          onSubmit={async (values, { setSubmitting, resetForm }) => {
+          onSubmit={async (
+            values: LabsFormValues,
+            { setSubmitting, resetForm }: FormikHelpers<LabsFormValues>,
+          ) => {
             try {
+              // Send to SheetDB
               const payload = {
                 ...values,
                 validation: values.validation.join(", "),
@@ -117,10 +175,18 @@ export default function LabsApply() {
                   body: JSON.stringify({
                     data: [payload],
                   }),
-                }
+                },
               );
 
               if (!res.ok) throw new Error("Request failed");
+
+              // Optional: Open Gmail with prefilled email
+              const subject = encodeURIComponent(
+                `New Labs Application – ${values.fullName}`,
+              );
+              const body = encodeURIComponent(buildEmailBody(values));
+              const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=vinilvalsan1991@gmail.com&su=${subject}&body=${body}`;
+              window.open(gmailUrl, "_blank");
 
               alert("Application submitted successfully 🚀");
               resetForm();
@@ -242,7 +308,7 @@ function renderStep(step: number, values: any, setFieldValue: any) {
                     "validation",
                     e.target.checked
                       ? [...values.validation, v]
-                      : values.validation.filter((x: string) => x !== v)
+                      : values.validation.filter((x: string) => x !== v),
                   )
                 }
               />
