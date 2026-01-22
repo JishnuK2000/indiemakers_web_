@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const ventures = [
   {
@@ -40,10 +41,41 @@ export default function ExploreOurVentures() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen w-full font-poppins text-[#062F2C] animate-fadeIn overflow-x-hidden">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-16 pt-28 sm:pt-32 lg:pt-[12rem] pb-16 lg:pb-24">
+    <div className="relative min-h-screen w-full font-poppins text-[#062F2C] overflow-x-hidden">
+      {/* ANIMATED BACKGROUND */}
+      <motion.svg
+        className="absolute inset-0 w-full h-full"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {[...Array(15)].map((_, i) => (
+          <motion.line
+            key={i}
+            x1={Math.random() * 2000 - 1000}
+            y1={Math.random() * 2000 - 1000}
+            x2={Math.random() * 2000 - 1000}
+            y2={Math.random() * 2000 - 1000}
+            stroke="#062F2C"
+            strokeWidth={0.5}
+            strokeOpacity={0.05}
+            animate={{
+              x1: [Math.random() * 2000 - 1000, Math.random() * 2000 - 1000],
+              y1: [Math.random() * 2000 - 1000, Math.random() * 2000 - 1000],
+              x2: [Math.random() * 2000 - 1000, Math.random() * 2000 - 1000],
+              y2: [Math.random() * 2000 - 1000, Math.random() * 2000 - 1000],
+            }}
+            transition={{
+              duration: 60 + Math.random() * 40,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "linear",
+            }}
+          />
+        ))}
+      </motion.svg>
+
+      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-16 pt-28 sm:pt-32 lg:pt-[12rem] pb-16 lg:pb-24">
         {/* HEADER */}
-        <div className="max-w-4xl mb-12 text-center lg:text-left animate-fadeUp">
+        <div className="max-w-4xl mb-12 text-center lg:text-left animate-fadeUp relative z-10">
           <h1 className="text-[clamp(30px,3.5vw,48px)] font-extrabold leading-tight">
             Our Ventures
           </h1>
@@ -54,12 +86,14 @@ export default function ExploreOurVentures() {
         </div>
 
         {/* VENTURE CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 relative z-10">
           {ventures.map((venture, index) => (
-            <div
+            <motion.div
               key={index}
-              style={{ animationDelay: `${index * 120}ms` }}
-              className="group border border-[#062F2C]/20 rounded-2xl overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fadeUp"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.15, duration: 0.8 }}
+              className="group border border-[#062F2C]/20 rounded-2xl overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               {/* IMAGE */}
               <div className="h-48 w-full overflow-hidden">
@@ -97,12 +131,12 @@ export default function ExploreOurVentures() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {/* BACK BUTTON */}
-        <div className="mt-16 flex justify-center lg:justify-start animate-fadeUp">
+        <div className="mt-16 flex justify-center lg:justify-start relative z-10 animate-fadeUp">
           <button
             onClick={() => navigate("/")}
             className="px-7 py-3 border-2 border-[#062F2C] rounded-full text-sm font-medium transition-all duration-300 hover:bg-[#062F2C] hover:text-white hover:scale-105"

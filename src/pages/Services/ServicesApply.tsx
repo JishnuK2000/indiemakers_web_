@@ -1,6 +1,7 @@
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import { useState } from "react";
 import * as Yup from "yup";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* -------------------- STEPS -------------------- */
 const STEPS = ["Intent", "Basic Info", "Company Context", "Engagement Scope", "Review"];
@@ -8,31 +9,48 @@ const STEPS = ["Intent", "Basic Info", "Company Context", "Engagement Scope", "R
 /* -------------------- VALIDATION -------------------- */
 const stepSchemas = [
   Yup.object(), // Step 0 - Intent (no required fields)
-
-  // Step 1 - Basic Info
   Yup.object({
     fullName: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email").required("Required"),
     company: Yup.string().required("Required"),
   }),
-
-  // Step 2 - Company Context
   Yup.object({
     companyStage: Yup.string().required("Required"),
     revenue: Yup.string().required("Required"),
     funding: Yup.string().required("Required"),
   }),
-
-  // Step 3 - Engagement Scope
   Yup.object({
     helpWith: Yup.array().min(1, "Select at least one"),
     problem: Yup.string().required("Required"),
     budget: Yup.string().required("Required"),
   }),
-
-  // Step 4 - Review (no required fields)
   Yup.object(),
 ];
+
+/* -------------------- EMAIL HELPER -------------------- */
+const buildEmailBody = (values: any) => {
+  return `
+Indiemakers Services – New Request
+
+BASIC INFO
+Full Name: ${values.fullName}
+Email: ${values.email}
+Company: ${values.company}
+Website: ${values.website}
+
+COMPANY CONTEXT
+Stage: ${values.companyStage}
+Revenue: ${values.revenue}
+Funding: ${values.funding}
+
+ENGAGEMENT SCOPE
+Help With: ${values.helpWith.join(", ")}
+Problem: ${values.problem}
+Budget: ${values.budget}
+
+Submitted On: ${new Date().toLocaleString()}
+`.trim();
+};
 
 /* -------------------- PAGE -------------------- */
 export default function ServicesApply() {
@@ -42,15 +60,23 @@ export default function ServicesApply() {
   return (
     <div className="bg-white pt-28 sm:pt-40 lg:pt-[220px] pb-24 px-4 sm:px-6 lg:px-16 max-h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto text-[#062F2C]">
-
-        {/* HEADER */}
-        <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">
+        <motion.h1
+          className="text-4xl sm:text-5xl font-extrabold mb-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
           Work With Indiemakers Services
-        </h1>
+        </motion.h1>
 
-        <p className="text-gray-600 mb-10">
+        <motion.p
+          className="text-gray-600 mb-10"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
           Step {step + 1} of {STEPS.length} — {STEPS[step]}
-        </p>
+        </motion.p>
 
         <Formik
           initialValues={{
@@ -69,29 +95,16 @@ export default function ServicesApply() {
           validateOnMount
           onSubmit={async (values, { resetForm, setSubmitting }: FormikHelpers<any>) => {
             try {
-              const res = await fetch(
-                "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    key: "INDIEMAKERS_SERVICES_SECRET",
-                    ...values,
-                  }),
-                }
-              );
+              const subject = encodeURIComponent(`New Services Request – ${values.fullName}`);
+              const body = encodeURIComponent(buildEmailBody(values));
+              const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=vinilvalsan1991@gmail.com&su=${subject}&body=${body}`;
+              window.open(gmailUrl, "_blank");
 
-              const result = await res.json();
-
-              if (result.success) {
-                alert("Thanks — we’ll review your request ✨");
-                resetForm();
-                setStep(0);
-              } else {
-                alert("Submission failed ❌");
-              }
+              alert("Request opened in Gmail! 🚀");
+              resetForm();
+              setStep(0);
             } catch {
-              alert("Network error. Please try later.");
+              alert("Something went wrong. Please try again.");
             } finally {
               setSubmitting(false);
             }
@@ -99,51 +112,59 @@ export default function ServicesApply() {
         >
           {({ isValid, values, setFieldValue, validateForm }) => (
             <Form>
-              <div key={step} className="transition-all duration-500 ease-out">
-                {renderStep(step, values, setFieldValue)}
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {renderStep(step, values, setFieldValue)}
+                </motion.div>
+              </AnimatePresence>
 
               {/* NAVIGATION */}
               <div className="flex justify-between mt-14">
                 {step > 0 && (
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => setStep(step - 1)}
                     className="px-6 py-3 border rounded-full hover:bg-gray-50"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     Back
-                  </button>
+                  </motion.button>
                 )}
 
                 {!isLast && (
-                  <button
+                  <motion.button
                     type="button"
                     onClick={async () => {
-                      // Validate current step fields
                       const errors = await validateForm();
                       const stepKeys = Object.keys(stepSchemas[step].fields);
                       const stepErrors = stepKeys.filter((key) => errors[key]);
-
-                      if (stepErrors.length === 0) {
-                        setStep(step + 1);
-                      } else {
-                        // Optional: mark all fields as touched to show errors
-                        alert("Please fill all required fields before continuing");
-                      }
+                      if (stepErrors.length === 0) setStep(step + 1);
+                      else alert("Please fill all required fields before continuing");
                     }}
                     className="ml-auto px-6 py-3 rounded-full text-white bg-[#062F2C]"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     Next
-                  </button>
+                  </motion.button>
                 )}
 
                 {isLast && (
-                  <button
+                  <motion.button
                     type="submit"
                     className="ml-auto px-8 py-3 bg-[#062F2C] text-white rounded-full"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     Request Review
-                  </button>
+                  </motion.button>
                 )}
               </div>
             </Form>
@@ -160,13 +181,18 @@ function renderStep(step: number, values: any, setFieldValue: any) {
     case 0:
       return (
         <Section>
-          <p className="text-lg text-gray-700 max-w-2xl">
+          <motion.p
+            className="text-lg text-gray-700 max-w-2xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             We provide senior-level product and engineering execution for teams
             building serious digital products.
             <br /><br />
             This short form helps us understand your needs and determine whether
             we’re a fit.
-          </p>
+          </motion.p>
         </Section>
       );
 
@@ -174,12 +200,12 @@ function renderStep(step: number, values: any, setFieldValue: any) {
       return (
         <Section title="Basic Information">
           <TwoCol>
-            <Input name="fullName" label="Full Name" />
-            <Input name="email" label="Work Email" />
+            <AnimatedInput name="fullName" label="Full Name" />
+            <AnimatedInput name="email" label="Work Email" />
           </TwoCol>
           <TwoCol>
-            <Input name="company" label="Company / Startup Name" />
-            <Input name="website" label="Website or Product URL (optional)" />
+            <AnimatedInput name="company" label="Company / Startup Name" />
+            <AnimatedInput name="website" label="Website or Product URL (optional)" />
           </TwoCol>
         </Section>
       );
@@ -187,7 +213,7 @@ function renderStep(step: number, values: any, setFieldValue: any) {
     case 2:
       return (
         <Section title="Company Context">
-          <Select
+          <AnimatedSelect
             name="companyStage"
             options={[
               "Pre-launch / MVP stage",
@@ -197,7 +223,7 @@ function renderStep(step: number, values: any, setFieldValue: any) {
               "Established business",
             ]}
           />
-          <Select
+          <AnimatedSelect
             name="revenue"
             options={[
               "No revenue yet",
@@ -207,14 +233,9 @@ function renderStep(step: number, values: any, setFieldValue: any) {
               "$200k+",
             ]}
           />
-          <Select
+          <AnimatedSelect
             name="funding"
-            options={[
-              "No",
-              "Yes (Angel)",
-              "Yes (Seed)",
-              "Yes (Series A or later)",
-            ]}
+            options={["No", "Yes (Angel)", "Yes (Seed)", "Yes (Series A or later)"]}
           />
         </Section>
       );
@@ -231,36 +252,29 @@ function renderStep(step: number, values: any, setFieldValue: any) {
             "Growth & monetization",
             "CTO-as-a-Service",
           ].map((v) => (
-            <label key={v} className="flex gap-2 items-center">
-              <input
+            <motion.label
+              key={v}
+              className="flex gap-2 items-center"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Field
                 type="checkbox"
-                checked={values.helpWith.includes(v)}
-                onChange={(e) =>
-                  setFieldValue(
-                    "helpWith",
-                    e.target.checked
-                      ? [...values.helpWith, v]
-                      : values.helpWith.filter((x: string) => x !== v)
-                  )
-                }
+                name="helpWith"
+                value={v}
                 className="w-4 h-4"
               />
               {v}
-            </label>
+            </motion.label>
           ))}
-
           <ErrorMessage name="helpWith" component="p" className="text-red-500 text-sm mt-1" />
 
-          <Textarea name="problem" label="Describe the problem you're solving" />
+          <AnimatedTextarea name="problem" label="Describe the problem you're solving" />
 
-          <Select
+          <AnimatedSelect
             name="budget"
-            options={[
-              "Under $5k",
-              "$5k–$15k",
-              "$15k–$40k",
-              "$40k+",
-            ]}
+            options={["Under $5k", "$5k–$15k", "$15k–$40k", "$40k+"]}
           />
         </Section>
       );
@@ -268,13 +282,18 @@ function renderStep(step: number, values: any, setFieldValue: any) {
     case 4:
       return (
         <Section title="Thanks — We’ll Review Your Request">
-          <p className="text-gray-600">
+          <motion.p
+            className="text-gray-600"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             We review every submission carefully.
             <br />
             If there’s a strong fit, we’ll reach out to schedule a conversation.
             <br />
             If not, we’ll let you know — no hard feelings.
-          </p>
+          </motion.p>
         </Section>
       );
 
@@ -297,27 +316,40 @@ function TwoCol({ children }: any) {
   return <div className="grid grid-cols-1 md:grid-cols-2 gap-5">{children}</div>;
 }
 
-function Input({ name, label }: any) {
+/* -------------------- ANIMATED FORM ELEMENTS -------------------- */
+function AnimatedInput({ name, label }: any) {
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <Field name={name} placeholder={label} className="w-full border p-3 rounded" />
       <ErrorMessage name={name} component="p" className="text-red-500 text-sm mt-1" />
-    </div>
+    </motion.div>
   );
 }
 
-function Textarea({ name, label }: any) {
+function AnimatedTextarea({ name, label }: any) {
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <Field as="textarea" rows={4} name={name} placeholder={label} className="w-full border p-3 rounded" />
       <ErrorMessage name={name} component="p" className="text-red-500 text-sm mt-1" />
-    </div>
+    </motion.div>
   );
 }
 
-function Select({ name, options }: any) {
+function AnimatedSelect({ name, options }: any) {
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <Field as="select" name={name} className="w-full border p-3 rounded">
         <option value="">Select</option>
         {options.map((o: string) => (
@@ -327,6 +359,6 @@ function Select({ name, options }: any) {
         ))}
       </Field>
       <ErrorMessage name={name} component="p" className="text-red-500 text-sm mt-1" />
-    </div>
+    </motion.div>
   );
 }

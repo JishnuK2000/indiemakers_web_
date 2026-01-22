@@ -1,18 +1,19 @@
 import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
 import { useState } from "react";
 import * as Yup from "yup";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 /* -------------------- STEP DEFINITIONS -------------------- */
 
 const STEPS = [
   "About You",
   "The Idea",
-  "Validation & Market",
+  "Market & Validation",
   "You as a Partner",
   "Commitment & Timeline",
   "Review & Submit",
 ];
-// Define TypeScript type for form values
+
 interface LabsFormValues {
   fullName: string;
   email: string;
@@ -21,58 +22,66 @@ interface LabsFormValues {
   problem: string;
   targetCustomer: string;
   solution: string;
-  whyNow: string;
   validation: string[];
   businessModel: string;
-  opportunitySize: string;
   whyYou: string;
   expectations: string;
-  equityPartnership: string;
   involvement: string;
-  timeline: string;
-  success3Years: string;
+  startTimeline: string;
 }
 
 /* -------------------- VALIDATION PER STEP -------------------- */
-
+/* -------------------- VALIDATION PER STEP -------------------- */
 const stepSchemas = [
+  // Step 0 — About You
   Yup.object({
     fullName: Yup.string().required("Full name is required"),
-    email: Yup.string().email().required("Email is required"),
+    email: Yup.string().email("Invalid email").required("Email is required"),
     role: Yup.string().required("Role is required"),
+    website: Yup.string(), // optional
   }),
 
+  // Step 1 — The Idea
   Yup.object({
     problem: Yup.string().required("Problem is required"),
     targetCustomer: Yup.string().required("Target customer is required"),
     solution: Yup.string().required("Solution is required"),
-    whyNow: Yup.string().required("This helps us understand timing"),
   }),
 
+  // Step 2 — Market & Validation
   Yup.object({
-    validation: Yup.array().min(1, "Select at least one"),
+    validation: Yup.array()
+      .min(1, "Please select at least one validation option")
+      .required("Validation is required"),
     businessModel: Yup.string().required("Business model is required"),
-    opportunitySize: Yup.string().required("Please explain opportunity size"),
   }),
 
+  // Step 3 — You as a Partner
   Yup.object({
-    whyYou: Yup.string().required("This is important"),
-    expectations: Yup.string().required("Please share expectations"),
-    equityPartnership: Yup.string().required("Please select one"),
+    whyYou: Yup.string().required("Please explain why you / your team"),
+    expectations: Yup.string().required("Please explain the support you need"),
   }),
 
+  // Step 4 — Commitment & Timeline
   Yup.object({
-    involvement: Yup.string().required("Required"),
-    timeline: Yup.string().required("Required"),
-    success3Years: Yup.string().required("Please answer"),
+    involvement: Yup.string().required("Please select your involvement"),
+    startTimeline: Yup.string().required("Please select a start timeline"),
   }),
 
+  // Step 5 — Review & Submit
   Yup.object(),
 ];
+/* -------------------- STEP ANIMATION -------------------- */
+const stepVariants: Variants = {
+  enter: { opacity: 0, y: 30 },
+  center: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+  exit: { opacity: 0, y: -30, transition: { duration: 0.3, ease: "easeIn" } },
+};
 
-// Helper function to build email body
-const buildEmailBody = (values: LabsFormValues): string => {
-  return `
+/* -------------------- EMAIL BODY -------------------- */
+
+const buildEmailBody = (values: LabsFormValues): string =>
+  `
 Indiemakers Labs – New Application
 
 ABOUT YOU
@@ -81,30 +90,27 @@ Email: ${values.email}
 Role: ${values.role}
 Website: ${values.website}
 
+
 THE IDEA
 Problem: ${values.problem}
 Target Customer: ${values.targetCustomer}
 Solution: ${values.solution}
-Why Now: ${values.whyNow}
 
-VALIDATION & MARKET
+MARKET & VALIDATION
 Validation: ${values.validation.join(", ")}
 Business Model: ${values.businessModel}
-Opportunity Size: ${values.opportunitySize}
 
 YOU AS A PARTNER
 Why You: ${values.whyYou}
 Expectations: ${values.expectations}
-Equity Partnership: ${values.equityPartnership}
-Involvement: ${values.involvement}
 
 COMMITMENT & TIMELINE
-Timeline: ${values.timeline}
-Success in 3 Years: ${values.success3Years}
+Involvement: ${values.involvement}
+Start Timeline: ${values.startTimeline}
 
 Submitted On: ${new Date().toLocaleString()}
 `.trim();
-};
+
 /* -------------------- PAGE -------------------- */
 
 export default function LabsApply() {
@@ -112,16 +118,7 @@ export default function LabsApply() {
   const isLast = step === STEPS.length - 1;
 
   return (
-    <div
-      className="
-        bg-white
-        pt-28 sm:pt-40 lg:pt-[220px]
-        pb-24
-        px-4 sm:px-6 lg:px-16
-        max-h-screen
-        overflow-y-auto
-      "
-    >
+    <div className="bg-white pt-28 sm:pt-40 lg:pt-[220px] pb-24 px-4 sm:px-6 lg:px-16 max-h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto text-[#062F2C]">
         <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">
           Apply to Co-Build With Indiemakers
@@ -140,59 +137,46 @@ export default function LabsApply() {
             problem: "",
             targetCustomer: "",
             solution: "",
-            whyNow: "",
             validation: [],
             businessModel: "",
-            opportunitySize: "",
             whyYou: "",
             expectations: "",
-            equityPartnership: "",
             involvement: "",
-            timeline: "",
-            success3Years: "",
+            startTimeline: "",
           }}
           validationSchema={stepSchemas[step]}
           validateOnMount
-          onSubmit={async (
-            values: LabsFormValues,
-            { setSubmitting, resetForm }: FormikHelpers<LabsFormValues>,
-          ) => {
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
             try {
-              // Send to SheetDB
               const payload = {
                 ...values,
                 validation: values.validation.join(", "),
                 createdAt: new Date().toISOString(),
               };
 
-              const res = await fetch(
-                "https://sheetdb.io/api/v1/prbayidgix6el",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    data: [payload],
-                  }),
-                },
-              );
+              // const res = await fetch(
+              //   "https://sheetdb.io/api/v1/prbayidgix6el",
+              //   {
+              //     method: "POST",
+              //     headers: { "Content-Type": "application/json" },
+              //     body: JSON.stringify({ data: [payload] }),
+              //   },
+              // );
+              // if (!res.ok) throw new Error("Request failed");
 
-              if (!res.ok) throw new Error("Request failed");
-
-              // Optional: Open Gmail with prefilled email
               const subject = encodeURIComponent(
                 `New Labs Application – ${values.fullName}`,
               );
               const body = encodeURIComponent(buildEmailBody(values));
-              const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=vinilvalsan1991@gmail.com&su=${subject}&body=${body}`;
-              window.open(gmailUrl, "_blank");
+              window.open(
+                `https://mail.google.com/mail/?view=cm&fs=1&to=vinilvalsan1991@gmail.com&su=${subject}&body=${body}`,
+                "_blank",
+              );
 
               alert("Application submitted successfully 🚀");
               resetForm();
               setStep(0);
-            } catch (err) {
-              console.error(err);
+            } catch {
               alert("Submission failed ❌");
             } finally {
               setSubmitting(false);
@@ -201,51 +185,42 @@ export default function LabsApply() {
         >
           {({ isValid, values, setFieldValue }) => (
             <Form>
-              {/* STEP CONTENT WITH TRANSITION */}
-              <div
-                key={step}
-                className="
-                  transition-all duration-500 ease-out
-                  opacity-100 translate-y-0
-                  animate-step
-                "
-              >
-                {renderStep(step, values, setFieldValue)}
-              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                >
+                  {renderStep(step, values, setFieldValue)}
+                </motion.div>
+              </AnimatePresence>
 
-              {/* NAVIGATION */}
               <div className="flex justify-between mt-14">
-                {step > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setStep(step - 1)}
-                    className="px-6 py-3 border rounded-full transition hover:bg-gray-50"
-                  >
-                    Back
-                  </button>
-                )}
+                <button
+                  type="button"
+                  disabled={!isValid} // <-- disables button if current step is invalid
+                  onClick={() => setStep(step + 1)}
+                  className={`ml-auto px-6 py-3 rounded-full text-white transition-all duration-300 ${
+                    isValid
+                      ? "bg-[#062F2C] hover:scale-[1.02]"
+                      : "bg-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  Next
+                </button>
 
-                {!isLast && (
-                  <button
-                    type="button"
-                    disabled={!isValid}
-                    onClick={() => setStep(step + 1)}
-                    className={`ml-auto px-6 py-3 rounded-full text-white transition-all duration-300
-                      ${
-                        isValid
-                          ? "bg-[#062F2C] hover:scale-[1.02]"
-                          : "bg-gray-300 cursor-not-allowed"
-                      }
-                    `}
-                  >
-                    Next
-                  </button>
-                )}
-
+                {/* Submit Button */}
                 {isLast && (
                   <button
                     type="submit"
-                    className="ml-auto px-8 py-3 bg-[#062F2C] text-white rounded-full transition hover:scale-[1.02]"
+                    disabled={!isValid} // <-- disables submit if form invalid
+                    className={`ml-auto px-8 py-3 rounded-full text-white transition-all duration-300 ${
+                      isValid
+                        ? "bg-[#062F2C] hover:scale-[1.02]"
+                        : "bg-gray-300 cursor-not-allowed"
+                    }`}
                   >
                     Submit Application
                   </button>
@@ -281,23 +256,19 @@ function renderStep(step: number, values: any, setFieldValue: any) {
       return (
         <Section title="The Idea">
           <Textarea name="problem" label="Problem you want to solve" />
-          <TwoCol>
-            <Input name="targetCustomer" label="Target customer" />
-            <Input name="whyNow" label="Why now?" />
-          </TwoCol>
+          <Input name="targetCustomer" label="Target customer" />
           <Textarea name="solution" label="Proposed solution" />
         </Section>
       );
 
     case 2:
       return (
-        <Section title="Validation & Market">
+        <Section title="Market & Validation">
           {[
             "No validation yet",
             "Customer interviews",
             "Pilot users",
             "Paying customers",
-            "Revenue-generating business",
           ].map((v) => (
             <label key={v} className="flex gap-2">
               <input
@@ -321,21 +292,17 @@ function renderStep(step: number, values: any, setFieldValue: any) {
             className="text-red-500"
           />
 
-          <TwoCol>
-            <Input name="businessModel" label="Business model" />
-            <Input name="opportunitySize" label="Opportunity size" />
-          </TwoCol>
+          <Input name="businessModel" label="Business model" />
         </Section>
       );
 
     case 3:
       return (
         <Section title="You as a Partner">
-          <Textarea name="whyYou" label="Why you?" />
-          <Textarea name="expectations" label="Expectations from Indiemakers" />
-          <Select
-            name="equityPartnership"
-            options={["Yes", "Yes, with conditions", "No"]}
+          <Textarea name="whyYou" label="Why you? Why your team?" />
+          <Textarea
+            name="expectations"
+            label="What kind of support are you looking for?"
           />
         </Section>
       );
@@ -343,21 +310,14 @@ function renderStep(step: number, values: any, setFieldValue: any) {
     case 4:
       return (
         <Section title="Commitment & Timeline">
-          <TwoCol>
-            <Select
-              name="involvement"
-              options={[
-                "Full-time",
-                "Part-time (significant)",
-                "Advisory only",
-              ]}
-            />
-            <Select
-              name="timeline"
-              options={["Immediately", "1–3 months", "3+ months"]}
-            />
-          </TwoCol>
-          <Textarea name="success3Years" label="Success in 3 years" />
+          <Select
+            name="involvement"
+            options={["Full-time", "Part-time", "Advisory only"]}
+          />
+          <Select
+            name="startTimeline"
+            options={["Immediately", "1–3 months", "3+ months"]}
+          />
         </Section>
       );
 
@@ -365,7 +325,7 @@ function renderStep(step: number, values: any, setFieldValue: any) {
       return (
         <Section title="Review & Submit">
           <p className="text-gray-600">
-            Clicking submit will open your email with all answers prefilled.
+            Review your answers before submitting.
           </p>
         </Section>
       );
